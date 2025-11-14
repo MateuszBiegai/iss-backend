@@ -56,51 +56,6 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-/* ============================================
-   ENDPOINT TTS — ElevenLabs
-   ============================================ */
-app.post("/api/tts", async (req, res) => {
-  try {
-    const text = req.body.text || "";
-
-    const response = await fetch(
-      "https://api.elevenlabs.io/v1/text-to-speech/DmPxCx2UnIDWBi70DMxr",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": process.env.ELEVENLABS_API_KEY
-        },
-        body: JSON.stringify({
-          text: text,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: { stability: 0.3, similarity_boost: 1 }
-        })
-      }
-    );
-
-    const audioBuffer = await response.arrayBuffer();
-
-    res.set({
-      "Content-Type": response.headers.get("content-type") || "audio/mpeg",
-      "Access-Control-Allow-Origin": "https://www.interactive-space-station.com"
-    });
-
-    res.send(Buffer.from(audioBuffer));
-
-  } catch (err) {
-    console.error("TTS error:", err);
-    res.status(500).send("TTS server error");
-  }
-});
-
-/* ============================================
-   SERVER START
-   ============================================ */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
-
-
 
 // ====== ElevenLabs TTS ======
 const ELEVEN_VOICE_ID = "DmPxCx2UnIDWBi70DMxr";
@@ -152,5 +107,15 @@ app.post("/api/tts", async (req, res) => {
     res.status(500).send("TTS internal error");
   }
 });
+
+
+/* ============================================
+   SERVER START
+   ============================================ */
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
+
+
+
 
 
