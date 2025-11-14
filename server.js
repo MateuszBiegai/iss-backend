@@ -73,17 +73,21 @@ app.post("/api/tts", async (req, res) => {
       })
     });
 
-    const audioBuffer = await response.arrayBuffer();
-    res.set({
-      "Content-Type": "audio/mpeg",
-      "Access-Control-Allow-Origin": "*"
-    });
-    res.send(Buffer.from(audioBuffer));
+  const audioBuffer = await response.arrayBuffer();
+
+res.set({
+  "Content-Type": response.headers.get("content-type") || "audio/mpeg",
+  "Access-Control-Allow-Origin": "*"
+});
+
+res.send(Buffer.from(audioBuffer));
+
 
   } catch (err) {
     console.error("TTS error:", err);
     res.status(500).send("TTS server error");
   }
 });
+
 
 
