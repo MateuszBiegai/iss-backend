@@ -1,12 +1,10 @@
 import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
-
 import fetch from "node-fetch";
 
 const app = express();
 
-// ⭐ JEDEN poprawny CORS – działa dla POST i OPTIONS
 app.use(cors({
   origin: "https://www.interactive-space-station.com",
   methods: ["GET", "POST", "OPTIONS"],
@@ -14,21 +12,16 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-// ⭐ Render potrzebuje obsłużyć preflight OPTIONS
 app.options("/api/chat", cors());
 
-// OpenAI
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Test endpoint
 app.get("/", (req, res) => {
   res.send("ISS Backend działa ✔");
 });
 
-// ⭐ Właściwy endpoint
 app.post("/api/chat", async (req, res) => {
   try {
     const userMsg = req.body.message || "";
@@ -49,39 +42,35 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
-
-
-
-
 
 app.post("/api/tts", async (req, res) => {
   try {
     const text = req.body.text || "";
 
-    const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/DmPxCx2UnIDWBi70DMxr", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "xi-api-key": process.env.ELEVENLABS_API_KEY
-      },
-      body: JSON.stringify({
-        text: text,
-        model_id: "eleven_multilingual_v2",
-        voice_settings: { stability: 0.3, similarity_boost: 1 }
-      })
+    const response = await fetch(
+      "https://api.elevenlabs.io/v1/text-to-speech/DmPxCx2UnIDWBi70DMxr",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "xi-api-key": process.env.ELEVENLABS_API_KEY
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: { stability: 0.3, similarity_boost: 1 }
+        })
+      }
+    );
+
+    const audioBuffer = await response.arrayBuffer();
+
+    res.set({
+      "Content-Type": response.headers.get("content-type") || "audio/mpeg",
+      "Access-Control-Allow-Origin": "*"
     });
 
-  const audioBuffer = await response.arrayBuffer();
-
-res.set({
-  "Content-Type": response.headers.get("content-type") || "audio/mpeg",
-  "Access-Control-Allow-Origin": "*"
-});
-
-res.send(Buffer.from(audioBuffer));
-
+    res.send(Buffer.from(audioBuffer));
 
   } catch (err) {
     console.error("TTS error:", err);
@@ -89,6 +78,5 @@ res.send(Buffer.from(audioBuffer));
   }
 });
 
-
-
-
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
