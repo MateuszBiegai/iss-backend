@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
 
-
+import fetch from "node-fetch";
 
 const app = express();
 
@@ -54,7 +54,7 @@ app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
 
 
 
-import fetch from "node-fetch";
+
 
 app.post("/api/tts", async (req, res) => {
   try {
@@ -88,6 +88,7 @@ res.send(Buffer.from(audioBuffer));
     res.status(500).send("TTS server error");
   }
 });
+
 
 
 
