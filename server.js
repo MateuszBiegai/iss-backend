@@ -5,23 +5,37 @@ import fetch from "node-fetch";
 
 const app = express();
 
+/* ============================================
+   CORS – DZIAŁAJĄCY DLA POST + OPTIONS
+   ============================================ */
 app.use(cors({
   origin: "https://www.interactive-space-station.com",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 }));
 
-app.use(express.json());
-app.options("/api/chat", cors());
+// Render wymaga pełnej obsługi preflight
+app.options("*", cors());
 
+app.use(express.json());
+
+/* ============================================
+   OPENAI
+   ============================================ */
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+/* ============================================
+   TEST
+   ============================================ */
 app.get("/", (req, res) => {
   res.send("ISS Backend działa ✔");
 });
 
+/* ============================================
+   ENDPOINT CZATU
+   ============================================ */
 app.post("/api/chat", async (req, res) => {
   try {
     const userMsg = req.body.message || "";
@@ -42,7 +56,9 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-
+/* ============================================
+   ENDPOINT TTS — ElevenLabs
+   ============================================ */
 app.post("/api/tts", async (req, res) => {
   try {
     const text = req.body.text || "";
@@ -67,7 +83,7 @@ app.post("/api/tts", async (req, res) => {
 
     res.set({
       "Content-Type": response.headers.get("content-type") || "audio/mpeg",
-      "Access-Control-Allow-Origin": "*"
+      "Access-Control-Allow-Origin": "https://www.interactive-space-station.com"
     });
 
     res.send(Buffer.from(audioBuffer));
@@ -78,5 +94,8 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
+/* ============================================
+   SERVER START
+   ============================================ */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
