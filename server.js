@@ -6,17 +6,14 @@ import fetch from "node-fetch";
 const app = express();
 
 /* ============================================
-   CORS – DZIAŁAJĄCY DLA POST + OPTIONS
+   CORS
    ============================================ */
 app.use(cors({
   origin: "https://www.interactive-space-station.com",
   methods: ["GET", "POST", "OPTIONS"],
   allowedHeaders: ["Content-Type"],
 }));
-
-// Render wymaga pełnej obsługi preflight
 app.options("*", cors());
-
 app.use(express.json());
 
 /* ============================================
@@ -56,24 +53,9 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-
-
 /* ============================================
-   SERVER START
+   ENDPOINT TTS — ElevenLabs
    ============================================ */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
-
-
-
-
-
-
-
-
-
-
-// ====== ElevenLabs TTS ======
 const ELEVEN_VOICE_ID = "DmPxCx2UnIDWBi70DMxr";
 const ELEVEN_URL = `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`;
 
@@ -84,11 +66,10 @@ app.post("/api/tts", async (req, res) => {
       return res.status(400).send("No text provided");
     }
 
-    // 👇 NAZWA ZMIENNEJ MA BYĆ TAKA, JAK NA RENDERZE
-    const apiKey = process.env.ELEVENLABS_API_KEY;
+    const apiKey = process.env.XI_API_KEY;
     if (!apiKey) {
-      console.error("Brak ELEVENLABS_API_KEY w zmiennych środowiskowych");
-      return res.status(500).send("ELEVENLABS_API_KEY not configured");
+      console.error("Brak XI_API_KEY w zmiennych środowiskowych");
+      return res.status(500).send("XI_API_KEY not configured");
     }
 
     const response = await fetch(ELEVEN_URL, {
@@ -109,7 +90,7 @@ app.post("/api/tts", async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("TTS error ElevenLabs:", response.status, errText.slice(0, 300));
+      console.error("TTS error:", response.status, errText.slice(0, 300));
       return res.status(500).send("TTS error");
     }
 
@@ -124,4 +105,8 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
-
+/* ============================================
+   SERVER START
+   ============================================ */
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
