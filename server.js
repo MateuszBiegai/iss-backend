@@ -2,6 +2,43 @@ import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
 
+import fetch from "node-fetch";
+
+app.post("/api/tts", async (req, res) => {
+  try {
+    const text = req.body.text || "";
+    const voice_id = "DmPxCx2UnIDWBi70DMxr";
+
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "xi-api-key": process.env.ELEVEN_API_KEY
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: "eleven_multilingual_v2",
+          voice_settings: {
+            stability: 0.3,
+            similarity_boost: 1
+          }
+        })
+      }
+    );
+
+    const audioBuffer = await response.arrayBuffer();
+    res.setHeader("Content-Type", "audio/mpeg");
+    res.send(Buffer.from(audioBuffer));
+
+  } catch (err) {
+    console.error("TTS error:", err);
+    res.status(500).json({ error: "TTS failed" });
+  }
+});
+
+
 const app = express();
 
 // ⭐ JEDEN poprawny CORS – działa dla POST i OPTIONS
@@ -49,3 +86,4 @@ app.post("/api/chat", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
+
