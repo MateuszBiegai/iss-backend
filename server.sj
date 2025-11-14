@@ -3,7 +3,13 @@ import cors from "cors";
 import OpenAI from "openai";
 
 const app = express();
+app.use(cors({
+  origin: "https://www.interactive-space-station.com",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
 app.use(express.json());
+
 
 // ⭐ CORS – to naprawia błąd
 app.use(cors({
@@ -43,3 +49,4 @@ app.post("/api/chat", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
+
