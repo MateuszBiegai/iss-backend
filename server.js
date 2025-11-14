@@ -56,6 +56,23 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+
+
+/* ============================================
+   SERVER START
+   ============================================ */
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
+
+
+
+
+
+
+
+
+
+
 // ====== ElevenLabs TTS ======
 const ELEVEN_VOICE_ID = "DmPxCx2UnIDWBi70DMxr";
 const ELEVEN_URL = `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`;
@@ -67,8 +84,8 @@ app.post("/api/tts", async (req, res) => {
       return res.status(400).send("No text provided");
     }
 
-    // 👇 UŻYWAMY TEJ ZMIENNEJ, KTÓRĄ USTAWIASZ NA RENDERZE
-    const apiKey = process.env.XI_API_KEY;
+    // 👇 NAZWA ZMIENNEJ MA BYĆ TAKA, JAK NA RENDERZE
+    const apiKey = process.env.ELEVENLABS_API_KEY;
     if (!apiKey) {
       console.error("Brak ELEVENLABS_API_KEY w zmiennych środowiskowych");
       return res.status(500).send("ELEVENLABS_API_KEY not configured");
@@ -107,10 +124,4 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
-
-/* ============================================
-   SERVER START
-   ============================================ */
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
 
