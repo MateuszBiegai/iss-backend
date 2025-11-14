@@ -59,34 +59,31 @@ import fetch from "node-fetch";
 app.post("/api/tts", async (req, res) => {
   try {
     const text = req.body.text || "";
-    const voice_id = "DmPxCx2UnIDWBi70DMxr";
 
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "xi-api-key": process.env.ELEVEN_API_KEY
-        },
-        body: JSON.stringify({
-          text: text,
-          model_id: "eleven_multilingual_v2",
-          voice_settings: {
-            stability: 0.3,
-            similarity_boost: 1
-          }
-        })
-      }
-    );
+    const response = await fetch("https://api.elevenlabs.io/v1/text-to-speech/DmPxCx2UnIDWBi70DMxr", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "xi-api-key": process.env.ELEVENLABS_API_KEY
+      },
+      body: JSON.stringify({
+        text: text,
+        model_id: "eleven_multilingual_v2",
+        voice_settings: { stability: 0.3, similarity_boost: 1 }
+      })
+    });
 
     const audioBuffer = await response.arrayBuffer();
-    res.setHeader("Content-Type", "audio/mpeg");
+    res.set({
+      "Content-Type": "audio/mpeg",
+      "Access-Control-Allow-Origin": "*"
+    });
     res.send(Buffer.from(audioBuffer));
 
   } catch (err) {
     console.error("TTS error:", err);
-    res.status(500).json({ error: "TTS failed" });
+    res.status(500).send("TTS server error");
   }
 });
+
 
