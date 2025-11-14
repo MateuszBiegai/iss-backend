@@ -56,11 +56,7 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-/* ============================================
-   ENDPOINT TTS — ElevenLabs (JEDYNY)
-   ============================================ */
-
-// Stałe TTS
+// ====== ElevenLabs TTS ======
 const ELEVEN_VOICE_ID = "DmPxCx2UnIDWBi70DMxr";
 const ELEVEN_URL = `https://api.elevenlabs.io/v1/text-to-speech/${ELEVEN_VOICE_ID}`;
 
@@ -71,10 +67,11 @@ app.post("/api/tts", async (req, res) => {
       return res.status(400).send("No text provided");
     }
 
-    const apiKey = process.env.XI_API_KEY;   // UŻYWAMY XI_API_KEY
+    // 👇 UŻYWAMY TEJ ZMIENNEJ, KTÓRĄ USTAWIASZ NA RENDERZE
+    const apiKey = process.env.XI_API_KEY;
     if (!apiKey) {
-      console.error("Brak XI_API_KEY w zmiennych środowiskowych");
-      return res.status(500).send("XI_API_KEY not configured");
+      console.error("Brak ELEVENLABS_API_KEY w zmiennych środowiskowych");
+      return res.status(500).send("ELEVENLABS_API_KEY not configured");
     }
 
     const response = await fetch(ELEVEN_URL, {
@@ -95,16 +92,14 @@ app.post("/api/tts", async (req, res) => {
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("TTS error od ElevenLabs:", response.status, errText.slice(0, 300));
+      console.error("TTS error ElevenLabs:", response.status, errText.slice(0, 300));
       return res.status(500).send("TTS error");
     }
 
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Zwracamy MP3
     res.setHeader("Content-Type", "audio/mpeg");
-    res.setHeader("Access-Control-Allow-Origin", "https://www.interactive-space-station.com");
     res.send(buffer);
   } catch (err) {
     console.error("TTS endpoint error:", err);
@@ -112,8 +107,10 @@ app.post("/api/tts", async (req, res) => {
   }
 });
 
+
 /* ============================================
    SERVER START
    ============================================ */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log("Backend działa na porcie", PORT));
+
