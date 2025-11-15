@@ -35,14 +35,32 @@ app.get("/", (req, res) => {
    ============================================ */
 app.post("/api/chat", async (req, res) => {
   try {
+    // NOWE: odbieramy message + history
     const userMsg = req.body.message || "";
+    const history = Array.isArray(req.body.history) ? req.body.history : [];
+
+    // Prostego guard'a na historię – bierzemy tylko poprawne wpisy
+    const safeHistory = history
+      .filter(m => m && typeof m.content === "string" && m.content.trim() !== "")
+      // ignorujemy ewentualne system prompty z frontu – system ustalamy tutaj
+      .map(m => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content
+      }));
+
+    // Składamy pełne messages dla OpenAI:
+    const messages = [
+      {
+        role: "system",
+        content: "Jesteś Astro Chat ISS – inteligentnym asystentem astronomicznym. Odpowiadasz rzeczowo, po ludzku, możesz kontynuować konwersację z uwzględnieniem poprzednich wiadomości użytkownika."
+      },
+      ...safeHistory,
+      { role: "user", content: userMsg }
+    ];
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "Jesteś Astro Chat ISS – inteligentnym asystentem." },
-        { role: "user", content: userMsg }
-      ]
+      messages
     });
 
     res.json({ reply: completion.choices[0].message.content });
